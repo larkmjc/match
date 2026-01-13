@@ -59,7 +59,7 @@ static int bits = 15;
 static std::string ltrim(std::string s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-            std::not1(std::ptr_fun<int, int>(std::isspace))));
+        [](unsigned char c){ return !std::isspace(c); }));
     return s;
 }
 
@@ -67,10 +67,9 @@ static std::string ltrim(std::string s)
 static std::string rtrim(std::string s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(),
-            std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+        [](unsigned char c){ return !std::isspace(c); }).base(), s.end());
     return s;
 }
-
 /* split string into vector */
 static std::vector<std::string> split(std::string str,
     std::string sep, bool inc_sep = false, bool inc_empty = false)
