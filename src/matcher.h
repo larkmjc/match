@@ -210,8 +210,10 @@ void Matcher<Symbol,Size>::decompose(bool partition)
      * Complexity ~ O(n)
      */
 
+    Match<Size> cur{};
+
     if (partition && mark < data.size()) {
-        matches.push_back({ MatchType::Literal, Size(mark), Size(0) });
+        cur = { MatchType::Literal, Size(mark), Size(0) };
     }
 
     while (mark < data.size())
@@ -259,24 +261,27 @@ void Matcher<Symbol,Size>::decompose(bool partition)
             if (len > pos + 1) break;
         }
 
-        if (len >= min_match) {
+        /* add copy instruction to list of matches. */
+        if (len >= min_match)
+        {
+            if (cur.length > 0) matches.push_back(cur);
+            cur = { MatchType::Copy, Size(best), Size(len) };
             mark += len;
-            /* add copy instruction to list of matches. */
-            if (matches.size() == 0 || matches.back().length > 0) {
-                matches.push_back({ MatchType::Copy, Size(best), Size(len) });
-            } else {
-                matches.back() = { MatchType::Copy, Size(best), Size(len) };
-            }
-        } else {
-            /* add new literal instruction if required. */
-            if (matches.size() == 0 ||
-                matches.back().offset + matches.back().length != mark) {
-                matches.push_back({ MatchType::Literal, Size(mark), Size(1) });
-            } else {
-                matches.back().length++;
-            }
-            /* advance mark by one. */
+        }
+        /* extend current literal instruction. */
+        else if (cur.type == MatchType::Literal &&
+                 cur.offset + cur.length == mark)
+        {
+            cur.length++;
+            mark++;
+        }
+        /* add new literal instruction. */
+        else {
+            if (cur.length > 0) matches.push_back(cur);
+            cur = { MatchType::Literal, Size(mark), Size(1) };
             mark++;
         }
     }
+
+    if (cur.length > 0) matches.push_back(cur);
 }
