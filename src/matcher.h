@@ -239,7 +239,7 @@ void Matcher<Symbol,Size>::decompose(bool partition)
              * check and follow hash table hits through chain matches to
              * find the best matches and save longer or earlier matches.
              */
-            while (last) {
+            while (last >= pos) {
                 size_t match_len = check_match(last, pos);
                 if (match_len >= min_match &&
                      (match_len > len ||
