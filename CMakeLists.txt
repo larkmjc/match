@@ -1,26 +1,15 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.12)
 
 project(match)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CheckCXXCompilerFlag)
+option(ENABLE_ASAN "Enable ASAN" OFF)
 
-macro(add_compiler_flags)
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARGN}")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARGN}")
-endmacro(add_compiler_flags)
-
-check_cxx_compiler_flag("-march=haswell" has_march_haswell "int main() { return 0; }")
-if (has_march_haswell)
-	list(APPEND CMAKE_C_FLAGS -march=haswell)
-	list(APPEND CMAKE_CXX_FLAGS -march=haswell)
-endif()
-
-check_cxx_compiler_flag("-pg" has_gprof "int main() { return 0; }")
-if (CMAKE_PROFILE AND has_gprof)
-  add_compiler_flags(-pg)
+if (ENABLE_ASAN)
+  list(APPEND CMAKE_CXX_FLAGS -fsanitize=address)
+  list(APPEND CMAKE_LINKER_FLAGS -fsanitize=address)
 endif()
 
 add_executable(match src/match.cc)
